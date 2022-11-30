@@ -1,0 +1,20 @@
+name = "pendler-cf"
+main = "src/index.ts"
+compatibility_date = "2022-12-12"
+
+kv_namespaces = [
+  { binding = "kv", id = "0a05ace2703840b5a1e9ef98ab847519", preview_id = "979e4a37c9a2487eb43128ea98a5884a" }
+]
+
+[triggers]
+crons = ["0,30 0 * * *"]
+
+[[queues.producers]]
+  queue = "stations"
+  binding = "queue"
+
+[[queues.consumers]]
+  queue = "stations"
+  max_batch_size = 5
+  max_batch_timeout = 30
+  max_retries = 1
