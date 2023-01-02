@@ -9,5 +9,5 @@ moment.tz.setDefault("Europe/Copenhagen");
 export default {
   fetch: route,
   queue: queue,
-  cron: cron,
+  scheduled: cron,
 };

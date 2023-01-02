@@ -24,7 +24,7 @@ WHERE
   }
 }`;
 
-async function cron(env: Env) {
+async function cron(_: ScheduledEvent, env: Env) {
   /* The cron is triggered twice every night
    * The first run will fetch all known stations from WikiData and set a flag
    * that data was synchronised in the KV store.
