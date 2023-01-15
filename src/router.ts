@@ -6,10 +6,10 @@ import departures from "./routes/departures.js";
 
 const router = Router();
 
-router.get("/", () => new Response("OK"));
+router.get("/", () => new Response());
 router.get("/stations", stations);
 router.get("/departures", departures);
-router.all("*", () => new Response("404", { status: 404 }));
+router.all("*", () => new Response(null, { status: 404 }));
 
 async function route(request: Request, env: Env): Promise<Response> {
   return router.handle(request, env).then((res) => {
