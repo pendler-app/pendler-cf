@@ -10,7 +10,8 @@
   "private": true,
   "scripts": {
     "start": "wrangler dev",
-    "deploy": "wrangler publish"
+    "deploy": "wrangler publish",
+    "format": "prettier --write \"**/*.ts\""
   },
   "dependencies": {
     "itty-router": "^2.6.6",
