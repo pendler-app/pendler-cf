@@ -1,5 +1,6 @@
 import type { Env } from "./config.js";
 import { SPARQLQueryDispatcher } from "./sparql.js";
+import { Meta } from "./models/meta.js";
 
 const endpointUrl = "https://query.wikidata.org/sparql";
 const sparqlQuery = `SELECT distinct ?itemLabel ?lat ?long
@@ -41,11 +42,14 @@ async function cron(_: ScheduledEvent, env: Env) {
     const cache = await Promise.all(
       keys
         .map(async (k) => {
-          return await env.kv.getWithMetadata(k.name, { cacheTtl: 3 * 3600 });
+          return await env.kv.getWithMetadata<Meta>(k.name, {
+            cacheTtl: 3 * 3600,
+          });
         })
         .filter(async (e) => {
           let entry = await e;
-          return entry.metadata != null && entry.metadata == "station";
+          let meta = entry.metadata;
+          return meta && "type" in meta && meta.type === "station";
         })
         .map(async (e) => {
           const entry = await e;
