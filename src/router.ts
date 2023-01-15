@@ -1,7 +1,6 @@
 import { Router } from "itty-router";
 import { Toucan } from "toucan-js";
 
-import { version } from "../package.json";
 import type { Env } from "./config.js";
 import stations from "./routes/stations.js";
 import departures from "./routes/departures.js";
@@ -9,7 +8,13 @@ import { Context } from "toucan-js/dist/types";
 
 const router = Router();
 
-router.get("/", () => new Response(JSON.parse(`{"versiosn: "${version}"}`)));
+router.get(
+  "/",
+  (_, env: Env) =>
+    new Response(JSON.stringify({ version: env.VERSION, status: "OK" }), {
+      status: 200,
+    })
+);
 router.get("/stations", stations);
 router.get("/departures", departures);
 router.all("*", () => new Response(null, { status: 404 }));
@@ -21,7 +26,7 @@ async function route(
 ): Promise<Response> {
   const sentry = new Toucan({
     dsn: env.SENTRY_DSN,
-    release: version,
+    release: env.VERSION,
     context,
     request,
   });
@@ -32,7 +37,7 @@ async function route(
       sentry.captureException(err);
       return new Response(
         JSON.stringify({
-          version: version,
+          version: env.VERSION,
           status: "An error occoured",
         }),
         {

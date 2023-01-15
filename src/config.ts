@@ -4,6 +4,7 @@ export interface Env {
   readonly kv: KVNamespace;
   readonly queue: Queue<WikiDataEntry>;
   readonly SENTRY_DSN: string;
+  readonly VERSION: string;
 }
 
 export default {

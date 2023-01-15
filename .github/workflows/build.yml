@@ -10,7 +10,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Dependencies
-        run: yarn install --dev
+        run: yarn install
 
       - name: Check for TypeScript errors
         run: yarn tsc
@@ -29,7 +29,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Dependencies
-        run: yarn install
+        run: yarn install --prod
+
+      - name: Set Version
+        run: echo "" >> wrangler.toml; echo "VERSION = \"$(git rev-parse --short HEAD)\"" >> wrangler.toml
 
       - name: Deploy to Cloudflare Workers with Wrangler
         with:
