@@ -8,6 +8,11 @@ export type WikiDataEntry = {
   long: {
     value: string;
   };
+  uic:
+    | {
+        value: string;
+      }
+    | undefined;
 };
 
 export type WikiData = {

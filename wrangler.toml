@@ -7,8 +7,7 @@ kv_namespaces = [
 ]
 
 [triggers]
-crons = ["0 * * * *"]
-#crons = ["0,30 0 * * *"]
+crons = ["0,30 0 * * *"]
 
 [[queues.producers]]
   queue = "stations"

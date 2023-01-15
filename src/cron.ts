@@ -3,7 +3,7 @@ import { SPARQLQueryDispatcher } from "./sparql.js";
 import { Meta } from "./models/meta.js";
 
 const endpointUrl = "https://query.wikidata.org/sparql";
-const sparqlQuery = `SELECT distinct ?itemLabel ?lat ?long
+const sparqlQuery = `SELECT distinct ?itemLabel ?lat ?long ?uic
 WHERE
 {
     { ?item wdt:P31 wd:Q2175765 ; wdt:P17 wd:Q35 }
@@ -17,7 +17,8 @@ WHERE
     ?coordinate psv:P625 ?coordinate_node.
     ?coordinate_node wikibase:geoLongitude ?long.
     ?coordinate_node wikibase:geoLatitude ?lat.
-
+  
+    OPTIONAL {?item wdt:P722 ?uic.}
 
     SERVICE wikibase:label {
      bd:serviceParam wikibase:language "da".
@@ -61,7 +62,7 @@ async function cron(_: ScheduledEvent, env: Env) {
   } else {
     // Query WikiData for all known stations in Denmark. See query in the top.
     const queryDispatcher = new SPARQLQueryDispatcher(endpointUrl);
-    await queryDispatcher.query(sparqlQuery).then((r) => {
+    await queryDispatcher.query(sparqlQuery).then(async (r) => {
       return r.results.bindings.map(async (station) => {
         return await env.queue.send(station);
       });
