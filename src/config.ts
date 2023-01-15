@@ -3,6 +3,7 @@ import { WikiDataEntry } from "./sparql.js";
 export interface Env {
   readonly kv: KVNamespace;
   readonly queue: Queue<WikiDataEntry>;
+  readonly SENTRY_DSN: string;
 }
 
 export default {
