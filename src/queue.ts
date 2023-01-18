@@ -5,7 +5,6 @@ import { WikiDataEntry } from "./sparql.js";
 import type { LocationDTO } from "./models/dto/location.js";
 import type { SearchDTO } from "./models/dto/search.js";
 import type { Station } from "./models/station.js";
-import type { Meta } from "./models/meta.js";
 
 async function queue(batch: MessageBatch<WikiDataEntry>, env: Env) {
   const stations = await Promise.all(
@@ -69,15 +68,9 @@ async function queue(batch: MessageBatch<WikiDataEntry>, env: Env) {
       })
       .map(async (s) => {
         let station = await s;
-        let meta: Meta = {
-          type: "station",
-        };
 
-        console.log(station);
-
-        return env.kv.put(station.name, JSON.stringify(station), {
+        return env.kv.put("station:" + station.name, JSON.stringify(station), {
           expirationTtl: 60 * 60 * 24 * 3, // Forget stations after three days
-          metadata: meta,
         });
       })
   );

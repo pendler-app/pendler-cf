@@ -35,30 +35,24 @@ async function cron(_: ScheduledEvent, env: Env) {
    */
 
   // Has the data been synchronised from WikiData?
-  if (await env.kv.get("synchronised")) {
+  if (await env.kv.get("meta:synchronised")) {
     const keys = (await env.kv.list()).keys;
 
     // Get all keys that have station in the metadata field and parse the
     // JSON-formatted station details. Save the result in the KV store.
     const cache = await Promise.all(
       keys
+        .filter((k) => {
+          return k.name.startsWith("station:");
+        })
         .map(async (k) => {
-          return await env.kv.getWithMetadata<Meta>(k.name, {
+          return await env.kv.get(k.name, {
             cacheTtl: 3 * 3600,
           });
         })
-        .filter(async (e) => {
-          let entry = await e;
-          let meta = entry.metadata;
-          return meta && "type" in meta && meta.type === "station";
-        })
-        .map(async (e) => {
-          const entry = await e;
-          return JSON.parse(entry.value ? entry.value : "");
-        })
     );
 
-    await env.kv.put("cache", JSON.stringify(cache));
+    await env.kv.put("meta:cache", JSON.stringify(cache));
   } else {
     // Query WikiData for all known stations in Denmark. See query in the top.
     const queryDispatcher = new SPARQLQueryDispatcher(endpointUrl);
@@ -69,7 +63,7 @@ async function cron(_: ScheduledEvent, env: Env) {
     });
 
     // Put flag into the KV-store such that the next run will update the cache.
-    await env.kv.put("synchronised", "1", { expirationTtl: 60 * 60 });
+    await env.kv.put("meta:synchronised", "1", { expirationTtl: 60 * 60 });
   }
 
   return true;
