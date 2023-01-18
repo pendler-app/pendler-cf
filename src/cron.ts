@@ -1,6 +1,5 @@
 import type { Env } from "./config.js";
 import { SPARQLQueryDispatcher } from "./sparql.js";
-import { Meta } from "./models/meta.js";
 
 const endpointUrl = "https://query.wikidata.org/sparql";
 const sparqlQuery = `SELECT distinct ?itemLabel ?lat ?long ?uic
