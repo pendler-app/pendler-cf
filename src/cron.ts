@@ -49,6 +49,12 @@ async function cron(_: ScheduledEvent, env: Env) {
             cacheTtl: 3 * 3600,
           });
         })
+        .map(async (s) => {
+          const value = await s;
+          if (!value) return null;
+          return JSON.parse(await value);
+        })
+        .filter((s) => s != null)
     );
 
     await env.kv.put("meta:cache", JSON.stringify(cache));
