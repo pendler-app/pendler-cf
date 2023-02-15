@@ -47,36 +47,42 @@ async function departures(request: Request) {
       /* Declare the details to be of type DetailedDepartureDTO */
       const details: DetailedDepartureDTO = await journey.json();
 
-      const stops: Stop[] = await Promise.all(
-        details.JourneyDetail.Stop.map(async (s) => {
-          /* Parse departure and arrival time to moment objects */
-          const arr = s.arrTime
-            ? moment(s.arrDate + s.arrTime, "DD.MM.YY hh:mm")
-            : null;
-          const dep = s.depTime
-            ? moment(s.depDate + s.depTime, "DD.MM.YY hh:mm")
-            : null;
-          const delay = s.rtTime
-            ? moment(s.rtDate + s.rtTime, "DD.MM.YY hh:mm").diff(dep)
-            : 0;
+      const stops: Stop[] = details.JourneyDetail.Stop
+        ? await Promise.all(
+            details.JourneyDetail.Stop.map(async (s) => {
+              /* Parse departure and arrival time to moment objects */
+              const arr = s.arrTime
+                ? moment(s.arrDate + s.arrTime, "DD.MM.YY hh:mm")
+                : null;
+              const dep = s.depTime
+                ? moment(s.depDate + s.depTime, "DD.MM.YY hh:mm")
+                : null;
+              const delay = s.rtTime
+                ? moment(s.rtDate + s.rtTime, "DD.MM.YY hh:mm").diff(dep)
+                : 0;
 
-          /* If a track is provided, yield that. Else null */
-          let track = null;
-          if (s.rtTrack) track = parseInt(s.rtTrack);
-          else if (s.track) track = parseInt(s.track);
+              /* If a track is provided, yield that. Else null */
+              let track = null;
+              if (s.rtTrack) track = parseInt(s.rtTrack);
+              else if (s.track) track = parseInt(s.track);
 
-          return {
-            name: s.name,
-            track: track,
-            arrival: arr ? arr.format() : null,
-            departure: dep ? dep.format() : null,
-            delay: delay,
-          };
-        })
-      );
+              return {
+                name: s.name,
+                track: track,
+                arrival: arr ? arr.format() : null,
+                departure: dep ? dep.format() : null,
+                delay: delay,
+              };
+            })
+          )
+        : [];
 
       let messages: Message[] = [];
-      if (details.JourneyDetail.MessageList) {
+      if (
+        details &&
+        details.JourneyDetail &&
+        details.JourneyDetail.MessageList
+      ) {
         /* If we have multiple messages, it will be resturned as an array */
         /* Else it is returned as an object */
         if (Array.isArray(details.JourneyDetail.MessageList.Message)) {
@@ -109,6 +115,7 @@ async function departures(request: Request) {
         track: track,
         messages: messages,
         stops: stops,
+        limited: !details.JourneyDetail.Stop,
       };
     })
   );

@@ -9,4 +9,5 @@ export type Departure = {
   time: string;
   messages: Message[];
   stops: Stop[];
+  limited: boolean;
 };
