@@ -108,7 +108,7 @@ async function departures(request: Request) {
       else if (d.track) track = parseInt(d.track);
 
       const delay = d.rtTime
-        ? moment(d.rtDate + d.rtTime, "DD.MM.YY hh:mm").diff(time)
+        ? moment(d.rtDate + d.rtTime, "DD.MM.YY hh:mm").diff(time, "minutes")
         : 0;
 
       return {
