@@ -11,14 +11,14 @@ import type { Stop } from "../models/stop.js";
 
 async function departures(request: Request) {
   /* No station ID provided */
-  if (!request.query || !request.query["station"]) {
+  if (!request.params || !request.params["id"]) {
     return new Response("400", { status: 400 });
   }
 
   /* Fetch departures from the station */
   /* Tell Cloudflare to cache the result for 30 seconds */
   const url =
-    config.urls.baseUrl + config.urls.departuresUrl + request.query["station"];
+    config.urls.baseUrl + config.urls.departuresUrl + request.params.id;
   let response = await fetch(url, {
     cf: {
       cacheTtl: 30,

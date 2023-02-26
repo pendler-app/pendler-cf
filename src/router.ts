@@ -16,7 +16,7 @@ router.get(
     })
 );
 router.get("/stations", stations);
-router.get("/departures", departures);
+router.get("/stations/:id", departures);
 router.all("*", () => new Response(null, { status: 404 }));
 
 async function route(
