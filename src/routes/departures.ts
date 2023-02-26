@@ -108,7 +108,7 @@ async function departures(request: Request) {
       else if (d.track) track = parseInt(d.track);
 
       return {
-        name: d.name,
+        name: d.name.replace("Metro ", "").replace("Letbane ", ""),
         type: d.type,
         direction: d.direction,
         time: time.format(),
