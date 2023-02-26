@@ -107,11 +107,16 @@ async function departures(request: Request) {
       if (d.rtTrack) track = parseInt(d.rtTrack);
       else if (d.track) track = parseInt(d.track);
 
+      const delay = d.rtTime
+        ? moment(d.rtDate + d.rtTime, "DD.MM.YY hh:mm").diff(time)
+        : 0;
+
       return {
         name: d.name.replace("Metro ", "").replace("Letbane ", ""),
         type: d.type,
         direction: d.direction,
         time: time.format(),
+        delay: delay,
         track: track,
         messages: messages,
         stops: stops,

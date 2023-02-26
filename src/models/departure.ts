@@ -7,6 +7,7 @@ export type Departure = {
   track: number | null;
   direction: string;
   time: string;
+  delay: number;
   messages: Message[];
   stops: Stop[];
   limited: boolean;
