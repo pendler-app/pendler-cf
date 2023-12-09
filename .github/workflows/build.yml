@@ -37,4 +37,4 @@ jobs:
       - name: Deploy to Cloudflare Workers with Wrangler
         with:
             apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        uses: cloudflare/wrangler-action@2.0.0
+        uses: cloudflare/wrangler-action@3.3.2
