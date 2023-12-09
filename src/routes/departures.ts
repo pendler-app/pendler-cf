@@ -125,7 +125,11 @@ async function departures(request: Request) {
       // ID is the hash of the first station name and departure time and direction
       // This is to ensure that the ID is the same for all stations in the same
       // direction and time.
-      const id = hashString(`${d.name}-${d.direction}-${time.format()}`);
+      // If we don't have any stops, we don't have enough details about the journey to create an ID
+      const id =
+        stops.length > 0
+          ? hashString(`${stops[0].name}-${d.direction}-${stops[0].departure}`)
+          : null;
 
       return {
         id: id,
