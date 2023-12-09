@@ -10,6 +10,8 @@ WHERE
     { ?item wdt:P31 wd:Q55488 ; wdt:P17 wd:Q35 }
     UNION
     { ?item wdt:P31 wd:Q928830 ; wdt:P17 wd:Q35 }
+    UNION
+    { ?item wdt:P31 wd:Q18543139 ; wdt:P17 wd:Q35 }
 
     ?item p:P625 ?coordinate.
     ?coordinate ps:P625 ?coord.
