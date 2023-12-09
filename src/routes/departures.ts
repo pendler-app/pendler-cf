@@ -1,5 +1,6 @@
 import { Request } from "itty-router";
 import moment from "moment-timezone";
+import * as CryptoJS from "crypto-js";
 
 import config from "../config.js";
 
@@ -8,6 +9,16 @@ import type { Departure } from "../models/departure.js";
 import type { DetailedDepartureDTO } from "../models/dto/detailedDeparture.js";
 import type { Message } from "../models/message.js";
 import type { Stop } from "../models/stop.js";
+
+function hashString(input: string): string {
+  // Using SHA-256 algorithm
+  const hash = CryptoJS.SHA256(input);
+
+  // Convert the hash to a hexadecimal string
+  const hashString = hash.toString(CryptoJS.enc.Hex);
+
+  return hashString;
+}
 
 async function departures(request: Request) {
   /* No station ID provided */
@@ -111,7 +122,13 @@ async function departures(request: Request) {
         ? moment(d.rtDate + d.rtTime, "DD.MM.YY hh:mm").diff(time, "minutes")
         : 0;
 
+      // ID is the hash of the first station name and departure time and direction
+      // This is to ensure that the ID is the same for all stations in the same
+      // direction and time.
+      const id = hashString(`${d.name}-${d.direction}-${time.format()}`);
+
       return {
+        id: id,
         name: d.name.replace("Metro ", "").replace("Letbane ", ""),
         type: d.type,
         direction: d.direction,
