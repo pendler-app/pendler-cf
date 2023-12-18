@@ -2,13 +2,14 @@ import { Request } from "itty-router";
 import moment from "moment-timezone";
 import * as CryptoJS from "crypto-js";
 
-import config from "../config.js";
+import config, { Env } from "../config.js";
 
 import type { BoardDTO } from "../models/dto/board.js";
 import type { Departure } from "../models/departure.js";
 import type { DetailedDepartureDTO } from "../models/dto/detailedDeparture.js";
 import type { Message } from "../models/message.js";
 import type { Stop } from "../models/stop.js";
+import { Station } from "../models/station.js";
 
 function hashString(input: string): string {
   // Using SHA-256 algorithm
@@ -20,7 +21,7 @@ function hashString(input: string): string {
   return hashString;
 }
 
-async function departures(request: Request) {
+async function departures(request: Request, env: Env) {
   /* No station ID provided */
   if (!request.params || !request.params["id"]) {
     return new Response("400", { status: 400 });
@@ -36,6 +37,16 @@ async function departures(request: Request) {
       cacheEverything: true,
     },
   });
+
+  // Get the list of stations from the KV store
+  const stations: Station[] = JSON.parse(
+    (await env.kv.get("meta:cache", { cacheTtl: 3 * 3600 })) ?? "[]"
+  );
+
+  // If we don't have the list of stations in the KV store, return a 503
+  if (!stations || stations.length === 0) {
+    return new Response("503", { status: 503 });
+  }
 
   /* Declare list of departures to be of type BoardDTO */
   const board: BoardDTO = await response.json();
@@ -77,12 +88,16 @@ async function departures(request: Request) {
               if (s.rtTrack) track = parseInt(s.rtTrack);
               else if (s.track) track = parseInt(s.track);
 
+              const uic =
+                stations.find((station) => station.name === s.name)?.id ?? null;
+
               return {
                 name: s.name,
                 track: track,
                 arrival: arr ? arr.format() : null,
                 departure: dep ? dep.format() : null,
                 delay: delay,
+                id: uic,
               };
             })
           )
