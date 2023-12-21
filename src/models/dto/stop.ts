@@ -8,4 +8,6 @@ export type StopDTO = {
   rtTrack: string | undefined;
   rtTime: string | undefined;
   rtDate: string | undefined;
+  x: string;
+  y: string;
 };

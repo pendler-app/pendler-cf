@@ -21,6 +21,29 @@ function hashString(input: string): string {
   return hashString;
 }
 
+// https://masoudx.medium.com/sorting-and-filtering-location-data-in-typescript-7c2f929f6a91
+function distance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const R = 6371e3; // Earth's radius in meters
+  const φ1 = (lat1 * Math.PI) / 180; // Latitude of first point converted to radians
+  const φ2 = (lat2 * Math.PI) / 180; // Latitude of second point converted to radians
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180; // Change in latitude converted to radians
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180; // Change in longitude converted to radians
+
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  const d = R * c; // Distance in meters
+  return d;
+}
+
 async function departures(request: Request, env: Env) {
   /* No station ID provided */
   if (!request.params || !request.params["id"]) {
@@ -88,8 +111,27 @@ async function departures(request: Request, env: Env) {
               if (s.rtTrack) track = parseInt(s.rtTrack);
               else if (s.track) track = parseInt(s.track);
 
-              const uic =
-                stations.find((station) => station.name === s.name)?.id ?? null;
+              const lat = parseInt(s.y) / 1000000;
+              const lon = parseInt(s.x) / 1000000;
+
+              // Find the station in the list of stations with 150 meters of this stop
+              const nearestStations = stations.sort((a, b) => {
+                return (
+                  distance(a.coord.lat, a.coord.long, lat, lon) -
+                  distance(b.coord.lat, b.coord.long, lat, lon)
+                );
+              });
+
+              // If the nearest station is more than 150 meters away, set id to null
+              const id =
+                distance(
+                  nearestStations[0].coord.lat,
+                  nearestStations[0].coord.long,
+                  lat,
+                  lon
+                ) > 150
+                  ? null
+                  : nearestStations[0].id;
 
               return {
                 name: s.name,
@@ -97,7 +139,7 @@ async function departures(request: Request, env: Env) {
                 arrival: arr ? arr.format() : null,
                 departure: dep ? dep.format() : null,
                 delay: delay,
-                id: uic,
+                id: id,
               };
             })
           )

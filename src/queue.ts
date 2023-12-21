@@ -58,8 +58,8 @@ async function queue(batch: MessageBatch<WikiDataEntry>, env: Env) {
         let station: Station = {
           id: parseInt(location.id),
           coord: {
-            lat: parseInt(location.x) / 1_000_000,
-            long: parseInt(location.y) / 1_000_000,
+            lat: parseInt(location.y) / 1_000_000,
+            long: parseInt(location.x) / 1_000_000,
           },
           name: location.name.replace(/\s*\(.*?\)\s*/g, ""),
         };

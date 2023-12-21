@@ -4,4 +4,5 @@ export type Stop = {
   arrival: string | null;
   departure: string | null;
   delay: number;
+  id: number | null;
 };
