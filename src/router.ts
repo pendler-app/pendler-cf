@@ -34,7 +34,11 @@ async function route(
   return router
     .handle(request, env)
     .catch((err) => {
-      sentry.captureException(err);
+      // If we have a version, we're in production, so we should report the error to Sentry
+      if (env.VERSION) {
+        sentry.captureException(err);
+      }
+
       return new Response(
         JSON.stringify({
           version: env.VERSION,
