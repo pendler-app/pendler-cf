@@ -1,4 +1,3 @@
-import { Request } from "itty-router";
 import moment from "moment-timezone";
 import * as CryptoJS from "crypto-js";
 
@@ -10,6 +9,7 @@ import type { DetailedDepartureDTO } from "../models/dto/detailedDeparture.js";
 import type { Message } from "../models/message.js";
 import type { Stop } from "../models/stop.js";
 import { Station } from "../models/station.js";
+import { IRequest } from "itty-router";
 
 function hashString(input: string): string {
   // Using SHA-256 algorithm
@@ -44,7 +44,7 @@ function distance(
   return d;
 }
 
-async function departures(request: Request, env: Env) {
+async function departures(request: IRequest, env: Env) {
   /* No station ID provided */
   if (!request.params || !request.params["id"]) {
     return new Response("400", { status: 400 });
