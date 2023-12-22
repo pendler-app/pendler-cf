@@ -8,6 +8,7 @@ export type DepartureDTO = {
   track: string | undefined;
   rtTrack: string | undefined;
   direction: string;
+  cancelled: string | undefined;
   JourneyDetailRef: {
     ref: string;
   };

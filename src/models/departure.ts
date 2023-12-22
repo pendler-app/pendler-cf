@@ -12,4 +12,5 @@ export type Departure = {
   messages: Message[];
   stops: Stop[];
   limited: boolean;
+  cancelled: boolean;
 };

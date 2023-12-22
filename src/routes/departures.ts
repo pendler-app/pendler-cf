@@ -197,8 +197,9 @@ async function departures(request: IRequest, env: Env) {
         delay: delay,
         track: track,
         messages: messages,
-        stops: stops,
         limited: !details.JourneyDetail.Stop,
+        cancelled: d.cancelled === "true",
+        stops: stops,
       };
     })
   );
