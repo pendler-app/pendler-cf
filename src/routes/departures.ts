@@ -129,7 +129,7 @@ async function departures(request: IRequest, env: Env) {
                   nearestStations[0].coord.long,
                   lat,
                   lon
-                ) > 150
+                ) > 250
                   ? null
                   : nearestStations[0].id;
 
