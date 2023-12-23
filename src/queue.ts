@@ -66,10 +66,13 @@ async function queue(batch: MessageBatch<WikiDataEntry>, env: Env) {
 
         return station;
       })
+      .filter(function (elem, index, self) {
+        return index === self.indexOf(elem);
+      })
       .map(async (s) => {
         let station = await s;
 
-        return env.kv.put("station:" + station.name, JSON.stringify(station), {
+        return env.kv.put("station:" + station.id, JSON.stringify(station), {
           expirationTtl: 60 * 60 * 24 * 3, // Forget stations after three days
         });
       })
