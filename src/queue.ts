@@ -6,6 +6,14 @@ import type { LocationDTO } from "./models/dto/location.js";
 import type { SearchDTO } from "./models/dto/search.js";
 import type { Station } from "./models/station.js";
 
+// This is not a perfect UIC validator, but it's good enough for our use case
+function isValidUIC(uic: string): boolean {
+  // Remove leading zeros and check if the UIC matches the pattern
+  const cleanedUIC = uic.replace(/^0+/, ""); // Remove leading zeros
+  const uicRegex = /^\d{7}|\d{8}$/;
+  return uicRegex.test(cleanedUIC);
+}
+
 async function queue(batch: MessageBatch<WikiDataEntry>, env: Env) {
   const stations = await Promise.all(
     batch.messages.map(async (b) => {
@@ -49,33 +57,41 @@ async function queue(batch: MessageBatch<WikiDataEntry>, env: Env) {
     stations
       .filter((item): item is LocationDTO | LocationDTO[] => !!item)
       .map(async (l) => {
-        return Array.isArray(l) ? l[0] : l;
-      })
-      .filter((s) => s != null)
-      .map(async (s) => {
-        const location: LocationDTO = await s;
+        if (Array.isArray(l)) {
+          return l.filter((item) => isValidUIC(item.id))[0];
+        }
 
-        let station: Station = {
-          id: parseInt(location.id),
-          coord: {
-            lat: parseInt(location.y) / 1_000_000,
-            long: parseInt(location.x) / 1_000_000,
-          },
-          name: location.name.replace(/\s*\(.*?\)\s*/g, ""),
-        };
+        return isValidUIC(l.id) ? l : null;
+      })
+  ).then((stations) =>
+    Promise.all(
+      stations
+        .filter((item): item is LocationDTO => !!item)
+        .map(async (s) => {
+          const location: LocationDTO = await s;
 
-        return station;
-      })
-      .filter(function (elem, index, self) {
-        return index === self.indexOf(elem);
-      })
-      .map(async (s) => {
-        let station = await s;
+          let station: Station = {
+            id: parseInt(location.id),
+            coord: {
+              lat: parseInt(location.y) / 1_000_000,
+              long: parseInt(location.x) / 1_000_000,
+            },
+            name: location.name.replace(/\s*\(.*?\)\s*/g, ""),
+          };
 
-        return env.kv.put("station:" + station.id, JSON.stringify(station), {
-          expirationTtl: 60 * 60 * 24 * 3, // Forget stations after three days
-        });
-      })
+          return station;
+        })
+        .filter(function (elem, index, self) {
+          return index === self.indexOf(elem);
+        })
+        .map(async (s) => {
+          let station = await s;
+
+          return env.kv.put("station:" + station.id, JSON.stringify(station), {
+            expirationTtl: 60 * 60 * 24 * 3, // Forget stations after three days
+          });
+        })
+    )
   );
 }
 
